@@ -1,0 +1,12 @@
+# docker
+/infra-data
+
+# vscode
+.vscode
+
+# node
+node_modules
+
+# package
+package-lock.json
+package.json

@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL (영구 저장소)
+  postgres:
+    image: postgres:15-alpine
+    container_name: collab-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: root!
+      POSTGRES_DB: collab_db
+    volumes:
+      - ./infra-data/postgres:/var/lib/postgresql/data
+    networks:
+      - collab-net
+
+  # 2. Redis (임시 버퍼 저장소)
+  redis:
+    image: redis:7-alpine
+    container_name: collab-redis
+    ports:
+      - "6379:6379"
+    # AOF(Append Only File) 옵션을 켜서 Redis가 꺼져도 데이터가 남도록 설정
+    command: redis-server --appendonly yes
+    volumes:
+      - ./infra-data/redis:/data
+    networks:
+      - collab-net
+
+  # 3. Redis GUI (데이터 확인용)
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: collab-redis-gui
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis
+    networks:
+      - collab-net
+
+  # 4. PostgreSQL GUI (데이터 확인용)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: collab-pgadmin
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      - postgres
+    networks:
+      - collab-net
+
+networks:
+  collab-net:
+    driver: bridge
