@@ -56,18 +56,27 @@ onMounted(() => {
   // 5. ★ 리더 선출 및 주기적 저장 로직 (핵심)
   leaderInterval = setInterval(() => {
     const myID = ydoc.clientID;
-    const otherClients = Array.from(provider.awareness.getStates().keys());
-    const allClients = [...otherClients]; 
+    
+    // awareness.getStates()에서 모든 클라이언트 ID 가져오기
+    const allAwarenessClients = Array.from(provider.awareness.getStates().keys());
+    
+    // 본인 제외한 다른 클라이언트들
+    const otherClients = allAwarenessClients.filter(id => id !== myID);
+    
+    // 전체 클라이언트 (본인 포함)
+    const allClients = [myID, ...otherClients];
     
     // 디버깅 로그
     console.log('🔍 [리더선출]', {
       myID,
-      otherClients,
-      allClients,
-      minID: Math.min(...allClients),
-      peers: provider.peers?.size || 0, // WebRTC 피어 수
+      allAwarenessClients,  // awareness에 있는 모든 ID (디버깅용)
+      otherClients,         // 다른 사람들
+      allClients,           // 본인 + 다른 사람들
+      minID: allClients.length > 0 ? Math.min(...allClients) : null,
+      peers: provider.peers?.size || 0,
     });
     
+    // 가장 작은 ID가 반장
     const amILeader = allClients.length > 0 && myID === Math.min(...allClients);
     isLeader.value = amILeader;
 

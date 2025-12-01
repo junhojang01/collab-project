@@ -7,6 +7,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // ✨ 표준 WebSocket 어댑터 장착
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
   app.useWebSocketAdapter(new WsAdapter(app));
 
   // CORS 허용
